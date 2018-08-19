@@ -35,23 +35,13 @@ BTCRelay 背后的思想是在比特币和以太坊节点之间建立一种信�
 
 对于比特币来讲，存储的成本大约是每年新增4.2M字节（每个比特币区块头80字节，平均每10分钟一个区块）。存储成本还是可以接受的，所以 BTCRelay 选择了第二种解决方案。
 
-### 架构是什么？什么是SPV？什么是Relayer？
+### BTCRelay 的组织架构
 
-基本组件：
-
-2. Relayer，
-1. 区块头存储与管理
-3. SPV Proof Generator
-4. SPV Verifier
-
-<center><img src="images/btcrelay-arch.png" alt="drawing" width="600px"/></center>
-<center>BTCRelay 架构示意图 </center>
-
-
-跨链交易验证的问题本质上是一个预言机问题，对于BTCRelay来讲，其核心就是建立一种机制获得比特币的相关数据，使得它能够验证任何一笔已经被比特币矿工确认的比特币交易。
+BTCRelay 有4个核心组件构成，他们彼此之间的关系如下图所示：
 
 - Relayer
-BTC Relay依赖于一组叫做Relayers的社区成员，他们通过运行一个软件从比特币网络区块向BTC Relay平台传输数据。以太坊去中心化应用程序（Dapps）然后可以查询Relay的智能合约来核查比特币网络上的活动。
+
+	Relayer 运行一个软件从比特币网络获取区块头数据，然后传输给向BTC Relay智能合约。Relayer 承担着预言机的角色和任务，而且这也是 BTCRelay 项目名称的由来，Relayer 是有社区自愿者构成。
 
 比特币和以太坊之间的交易价值仍然需要第三方中介，这些分散技术试图取代它。BTC Relay用信任最小化的智能合约取代第三方。这加深了区块链空间的两个主要元素的互连，使我们更接近统一的全球价值转移网络。
 
@@ -61,8 +51,11 @@ BTC Relay依赖于一组叫做Relayers的社区成员，他们通过运行一个
 
 - SPV Proof 验证
 
-- ![](spv.png)
 
+<center><img src="images/btcrelay-arch.png" alt="drawing" width="600px"/></center>
+<center>BTCRelay 架构示意图 </center>
+
+此设计提现了信任最小化的原理，在此系统中的4个核心组件都比特币和以太坊是去中心化的共识系统，SPV Proof Generator 
 
 ## 3. 详细技术分析，源代码分析
 
@@ -73,7 +66,9 @@ BTC Relay依赖于一组叫做Relayers的社区成员，他们通过运行一个
 3. 存储比特币的区块头
 4. 检查智能合约内部最新的Bitcoin区块信息
 
-BTCRelay 智能合约的详细的ABI接口信息请参考：http://btcrelay.surge.sh/BitcoinRelayABI.js。这里只介绍关键的几个接口函数
+BTCRelay 智能合约的详细的ABI接口信息请参考：http://btcrelay.surge.sh/BitcoinRelayABI.js。
+
+这里只介绍关键的几个接口函数:
 
 - verifyTx(rawTransaction, transactionIndex, merkleSibling, blockHash)
 
