@@ -155,7 +155,6 @@ BTCRelay 通过内嵌一个“小型的比特币区块头数据库”，结合 S
 - BTCRelay 智能合约ABI接口: [http://btcrelay.surge.sh/BitcoinRelayABI.js](http://btcrelay.surge.sh/BitcoinRelayABI.js)
 - BTCRelay 主网：[https://etherscan.io/address/0x41f274c0023f83391de4e0733c609df5a124c3d4](https://etherscan.io/address/0x41f274c0023f83391de4e0733c609df5a124c3d4)
 - [BTC Relay Is Live](https://consensys.net/static/BTCrelay.pdf)
-
 - [Enabling Blockchain Innovations with Pegged Sidechains](https://blockstream.com/sidechains.pdf)
 - [Trust pegging of BTC in Ethereum - 双向挂钩](https://medium.com/@ConsenSys/taking-stock-bitcoin-and-ethereum-4382f0a2f17)
 
