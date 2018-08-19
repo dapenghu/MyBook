@@ -41,21 +41,24 @@ BTCRelay 有4个核心组件构成，他们彼此之间的关系如下图所示�
 
 - Relayer
 
-	Relayer 运行一个软件从比特币网络获取区块头数据，然后传输给向BTC Relay智能合约。Relayer 承担着预言机的角色和任务，而且这也是 BTCRelay 项目名称的由来，Relayer 是有社区自愿者构成。
+	Relayer 由社区自愿者构成，运行一个软件从比特币网络获取区块头数据，然后传输给向BTC Relay智能合约。它在系统中承担着预言机的角色和任务，而且这也是 BTCRelay 项目名称的由来。
 
-比特币和以太坊之间的交易价值仍然需要第三方中介，这些分散技术试图取代它。BTC Relay用信任最小化的智能合约取代第三方。这加深了区块链空间的两个主要元素的互连，使我们更接近统一的全球价值转移网络。
+- Header Management
 
-- 区块头验证和存储
+	这部分负责验证、存储和管理比特币的区块头列表。每次接收到来自 Relayer 的最新区块头数据，要验证其hash是否满足难度要求，然后验证是否为孤块，验证通过后保存到区块头数组中，并且根据区块高度和hash值建索引。
 
-- SPV Proof 生成
+- SPV Proof Generator
 
-- SPV Proof 验证
+	SPV Proof Generator 负责为指定的交易生成 SPV Proof。BTCRelay 本身并没有提供 SPV Proof Generator 的实现。但是可以使用第三方提供的开源工具，比如 [bitcoin-proof](https://www.npmjs.com/package/bitcoin-proof)。
 
+- SPV Proof Verifier
+
+	SPV Proof Verifier 根据 SPV 原理验证比特币交易，此外为保证交易的最终确定性，还要验证交易的确认数是否大于等于6。所有验证条件满足后，会把交易转发给预先指定的其它智能合约处理。
 
 <center><img src="images/btcrelay-arch.png" alt="drawing" width="600px"/></center>
 <center>BTCRelay 架构示意图 </center>
 
-此设计提现了信任最小化的原理，在此系统中的4个核心组件都比特币和以太坊是去中心化的共识系统，SPV Proof Generator 
+此系统提现了信任最小化的设计原理，比特币和以太坊的智能合约是经过实际检验的去中心化分布式账本系统；SPV Proof Generator / Verifier 的安全性来自于 Merkle 树的抗强碰撞性；Relayer 的安全性来自于比特币的POW难度系数，如果要提供一个假的区块头，必须组织庞大算力才能挖出假的区块。系统中的每一个组件都很难作弊，所以 BTCRelay 整体上成为一个去信任的分布式系统。
 
 ## 3. 详细技术分析，源代码分析
 
@@ -126,23 +129,17 @@ BTCRelay 智能合约的详细的ABI接口信息请参考：http://btcrelay.surg
 - getBlockchainHead(), getLastBlockHeight(), others
 
 
-# 总结，在整个的侧链和跨链背景下，定位和价值是什么？如何评价？有什么借鉴和参考价值？有什么关联项目？需要注意的问题？相关的性能指标？优劣势总结
+# BTCRelay 有什么借鉴和参考价值？
 
-
-BTCRelay 并不是一个完整的侧链项目，它并没有实现资产的双向锚定，它本身并不支持比特币资产转移到以太坊网络上，这个任务有RootStock 完成。但是它完成了侧链的第一个步骤：侧链验证主链的交易功能。
+BTCRelay 通过内嵌一个“小型的比特币区块头数据库”，结合 SPV 原理实现了从比特币到以太坊的、去信任的、单向跨链通信。虽然没有实现资产的双向锚定，并不是一个完整的侧链项目，但是其设计简单而精巧，对于侧链跨链协议的实现有很重要的参考价值，这个方案也可以拓展到其它跨链通信的场景中。
 
 这种方法可以扩展到其它区块链项目上，比如比特币和EOS之间，
 
-它的限制：
+但是从官网和 github 上看，BTCRelay 有比较长的时间没有更新了。它自身也存在以下的问题：
 
-- 存储限制，主链区块头的数据量比较小
-- 延时问题，最终确定性
-
-BTC Relay采用了智能合约内嵌Bitcoin SPV的原理来允许以太用户可以用Bitcoin进行交易的目的，合约里面存储了另一个“小型的Bitcoin区块链”，因此也称为以太坊的一条侧链。从BTC Relay的官网以及github互动来看，这个项目应该已经有比较长的时间没有更新了，总体开看，这个项目不同于其他利用类似双向锚定原理的侧链，直接利用以太坊的智能合约实现，原理上比较容易理解，但个人认为其存在以下几个问题：
-
-依靠社区成员Relayers来维护这个合约的成本较高（手续费太高）
-社区成员Relayers活跃度太低，从其mainnet来看，现在只有单一的Relayers
-内部智能合约体积膨胀问题
+- 手续费太高：提交区块头、提交SPV Proof 都需要手续费，这部分成本由Relayer，和SPV Proof Generator 承担。
+- 社区成员Relayers活跃度太低，从其mainnet来看，现在只有单一的Relayers
+- 延时太高：  由于比特币交易至少需要一个小时(6个确认)才能达到一般最终确定性的要求，所以从交易被确认到 BTCRelay 验证通过至少有1个小时的延时。
 
 # 开放式思考
 1. 如何建立一种信任机制，让比特币节点验证以太坊的交易，或者智能合约的状态更新？
@@ -151,13 +148,14 @@ BTC Relay采用了智能合约内嵌Bitcoin SPV的原理来允许以太用户可
 4. 假如你是一个程序员，请尝试写一个程序生成指定比特币交易的SPV Proof，并且验证SPV Proof的正确性。
 5. 尝试写一个使用比特币众筹的Dapp。
 
-# 参考文献列表
+# 参考资料列表
 
-- [Enabling Blockchain Innovations with Pegged Sidechains](https://blockstream.com/sidechains.pdf)
-
-
+- BTCRelay 官网: [http://btcrelay.org/](http://btcrelay.org/)
+- BTCRelay 源码：[https://github.com/ethereum/btcrelay](https://github.com/ethereum/btcrelay)
+- BTCRelay 智能合约ABI接口: [http://btcrelay.surge.sh/BitcoinRelayABI.js](http://btcrelay.surge.sh/BitcoinRelayABI.js)
+- BTCRelay 主网：[https://etherscan.io/address/0x41f274c0023f83391de4e0733c609df5a124c3d4](https://etherscan.io/address/0x41f274c0023f83391de4e0733c609df5a124c3d4)
 - [BTC Relay Is Live](https://consensys.net/static/BTCrelay.pdf)
 
-
+- [Enabling Blockchain Innovations with Pegged Sidechains](https://blockstream.com/sidechains.pdf)
 - [Trust pegging of BTC in Ethereum - 双向挂钩](https://medium.com/@ConsenSys/taking-stock-bitcoin-and-ethereum-4382f0a2f17)
 
