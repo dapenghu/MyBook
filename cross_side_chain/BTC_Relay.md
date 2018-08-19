@@ -129,26 +129,24 @@ BTCRelay 智能合约的详细的ABI接口信息请参考：http://btcrelay.surg
 - getBlockchainHead(), getLastBlockHeight(), others
 
 
-# BTCRelay 有什么借鉴和参考价值？
+## 总结
 
 BTCRelay 通过内嵌一个“小型的比特币区块头数据库”，结合 SPV 原理实现了从比特币到以太坊的、去信任的、单向跨链通信。虽然没有实现资产的双向锚定，并不是一个完整的侧链项目，但是其设计简单而精巧，对于侧链跨链协议的实现有很重要的参考价值，这个方案也可以拓展到其它跨链通信的场景中。
 
-这种方法可以扩展到其它区块链项目上，比如比特币和EOS之间，
-
 但是从官网和 github 上看，BTCRelay 有比较长的时间没有更新了。它自身也存在以下的问题：
 
-- 手续费太高：提交区块头、提交SPV Proof 都需要手续费，这部分成本由Relayer，和SPV Proof Generator 承担。
+1. 手续费太高：提交区块头、提交SPV Proof 都需要手续费，这部分成本由Relayer，和SPV Proof Generator 承担。
 - 社区成员Relayers活跃度太低，从其mainnet来看，现在只有单一的Relayers
 - 延时太高：  由于比特币交易至少需要一个小时(6个确认)才能达到一般最终确定性的要求，所以从交易被确认到 BTCRelay 验证通过至少有1个小时的延时。
 
-# 开放式思考
+## 开放式思考
 1. 如何建立一种信任机制，让比特币节点验证以太坊的交易，或者智能合约的状态更新？
 2. 如果要建立一种信任机制，让以太坊识别EOS的交易，还能用 BTCRelay 这种方案吗？
 3. 如果要建立一种信任机制，让以太坊识别传统金融机构的交易(比如银行转账，股票交易等)，有什么解决方案？
 4. 假如你是一个程序员，请尝试写一个程序生成指定比特币交易的SPV Proof，并且验证SPV Proof的正确性。
 5. 尝试写一个使用比特币众筹的Dapp。
 
-# 参考资料列表
+## 参考资料列表
 
 - BTCRelay 官网: [http://btcrelay.org/](http://btcrelay.org/)
 - BTCRelay 源码：[https://github.com/ethereum/btcrelay](https://github.com/ethereum/btcrelay)
